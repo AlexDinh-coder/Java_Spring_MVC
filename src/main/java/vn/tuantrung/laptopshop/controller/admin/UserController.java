@@ -1,11 +1,7 @@
-package vn.hoidanit.laptopshop.controller.admin;
-
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+package vn.tuantrung.laptopshop.controller.admin;
 import java.util.List;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -15,9 +11,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.servlet.ServletContext;
-import vn.hoidanit.laptopshop.domain.User;
-import vn.hoidanit.laptopshop.services.UploadService;
-import vn.hoidanit.laptopshop.services.UserService;
+import vn.tuantrung.laptopshop.domain.User;
+import vn.tuantrung.laptopshop.services.UploadService;
+import vn.tuantrung.laptopshop.services.UserService;
+
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -27,14 +24,15 @@ public class UserController {
     // //DI: Dependency Injection
     private final UserService userService;
     private final UploadService uploadService;
+    private final PasswordEncoder passwordEncoder;
 
     public UserController(UploadService uploadService,
     UserService userService, 
-    ServletContext servletContext) {
+    PasswordEncoder passwordEncoder) {
         this.userService = userService;
         this.uploadService = uploadService;
+        this.passwordEncoder = passwordEncoder;
     
-
     }
 
     @RequestMapping("/")
@@ -92,7 +90,13 @@ public class UserController {
             @RequestParam("trungFile") MultipartFile file) {
 
              String avatar = this.uploadService.handleSaveUploadFile(file, "avatar");
-                
+             String hasPassword = this.passwordEncoder.encode(tuantrung.getPassword());
+
+             tuantrung.setAvatar(avatar);
+             tuantrung.setPassword(hasPassword);
+             tuantrung.setRole(this.userService.getRoleByName(tuantrung.getRole().getName()));
+         //save
+         this.userService.handleSaveUser(tuantrung);       
         return "redirect:/admin/user";
     }
 
