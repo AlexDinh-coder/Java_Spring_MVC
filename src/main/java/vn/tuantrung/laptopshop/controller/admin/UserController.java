@@ -1,16 +1,19 @@
 package vn.tuantrung.laptopshop.controller.admin;
+
 import java.util.List;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
-import jakarta.servlet.ServletContext;
+import jakarta.validation.Valid;
 import vn.tuantrung.laptopshop.domain.User;
 import vn.tuantrung.laptopshop.services.UploadService;
 import vn.tuantrung.laptopshop.services.UserService;
@@ -27,12 +30,12 @@ public class UserController {
     private final PasswordEncoder passwordEncoder;
 
     public UserController(UploadService uploadService,
-    UserService userService, 
-    PasswordEncoder passwordEncoder) {
+            UserService userService,
+            PasswordEncoder passwordEncoder) {
         this.userService = userService;
         this.uploadService = uploadService;
         this.passwordEncoder = passwordEncoder;
-    
+
     }
 
     @RequestMapping("/")
@@ -86,17 +89,27 @@ public class UserController {
 
     @PostMapping("/admin/user/create")
     public String createUserPage(Model model,
-            @ModelAttribute("newUser") User tuantrung,
-            @RequestParam("trungFile") MultipartFile file) {
+            @ModelAttribute("newUser") @Valid User tuantrung,
+            BindingResult bindingResult,
+            @RequestParam("trungFile") MultipartFile file
+            ) {
+        List<FieldError> errors = bindingResult.getFieldErrors();
+        for (FieldError error : errors) {
+            System.out.println(error.getObjectName() + " - " + error.getDefaultMessage());
+        }
 
-             String avatar = this.uploadService.handleSaveUploadFile(file, "avatar");
-             String hasPassword = this.passwordEncoder.encode(tuantrung.getPassword());
+        // validate
 
-             tuantrung.setAvatar(avatar);
-             tuantrung.setPassword(hasPassword);
-             tuantrung.setRole(this.userService.getRoleByName(tuantrung.getRole().getName()));
-         //save
-         this.userService.handleSaveUser(tuantrung);       
+        //
+
+        String avatar = this.uploadService.handleSaveUploadFile(file, "avatar");
+        String hasPassword = this.passwordEncoder.encode(tuantrung.getPassword());
+
+        tuantrung.setAvatar(avatar);
+        tuantrung.setPassword(hasPassword);
+        tuantrung.setRole(this.userService.getRoleByName(tuantrung.getRole().getName()));
+        // save
+        this.userService.handleSaveUser(tuantrung);
         return "redirect:/admin/user";
     }
 
