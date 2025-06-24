@@ -7,7 +7,7 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 
 @Entity
@@ -29,6 +29,7 @@ public class Product {
 
     @NotNull
     @NotEmpty(message = "Mô tả chi tiết không được để trống")
+    @Column(columnDefinition = "MEDIUMTEXT")
     private String detailDesc;
 
     @NotNull
