@@ -21,15 +21,15 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     @NotNull
-    @Email
+    @Email(message = "Email không hợp lệ", regexp = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$")
     private String email;
 
     @NotNull
-    @Size(min = 3)
+    @Size(min = 3, message = "Password phải có ít nhất 3 kí tự")
     private String password;
-    
+
     @NotNull
-    @Size(min = 2)
+    @Size(min = 3, message = "Full name phải có ít nhất 3 kí tự")
 
     private String fullName;
     private String address;
@@ -37,17 +37,15 @@ public class User {
 
     private String avatar;
 
-    //roleId
-    //User many -> to one -> role
+    // roleId
+    // User many -> to one -> role
     @ManyToOne
-    @JoinColumn(name = "role_id") 
+    @JoinColumn(name = "role_id")
     private Role role;
 
-    
     @OneToMany(mappedBy = "user")
-    List<Order> orders; 
-    
-    
+    List<Order> orders;
+
     public Role getRole() {
         return role;
     }
@@ -112,8 +110,6 @@ public class User {
         this.phone = phone;
     }
 
-
-
     public String getAvatar() {
         return avatar;
     }
@@ -127,7 +123,5 @@ public class User {
         return "User [id=" + id + ", email=" + email + ", password=" + password + ", fullName=" + fullName
                 + ", address=" + address + ", phone=" + phone + ", avatar=" + avatar + "]";
     }
-
-    
 
 }
