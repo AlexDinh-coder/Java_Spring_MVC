@@ -20,6 +20,8 @@ import vn.tuantrung.laptopshop.services.UserService;
 import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 
 
@@ -79,6 +81,10 @@ public class HomePageController {
         return "client/auth/login";
     }
     
+    @GetMapping("/access-deny")
+    public String getDenyPage(Model model) {
+        return "client/auth/deny";
+    }
     
     
 }

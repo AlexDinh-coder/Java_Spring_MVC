@@ -33,6 +33,11 @@
                                                         </div>
                                                     </c:if>
 
+                                                    <c:if test="${param.logout != null}">
+                                                        <div class="my-2" style="color: green;">Logout success.
+                                                        </div>
+                                                    </c:if>
+
                                                     <div class="form-floating mb-3">
                                                         <input class="form-control" type="email"
                                                             placeholder="name@example.com" name="username" />
@@ -49,7 +54,7 @@
                                                     </div>
                                                     <div class="form-check mb-3">
                                                         <input class="form-check-input" id="inputRememberPassword"
-                                                            type="checkbox" value="" />
+                                                            type="checkbox" name="remember-me" />
                                                         <label class="form-check-label"
                                                             for="inputRememberPassword">Remember Password</label>
                                                     </div>
