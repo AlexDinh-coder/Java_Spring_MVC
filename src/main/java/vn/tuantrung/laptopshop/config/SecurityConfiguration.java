@@ -81,7 +81,7 @@ public class SecurityConfiguration {
                         .maximumSessions(1)
                         .maxSessionsPreventsLogin(false))
 
-                .logout(logout->logout.deleteCookies("JSESSIONID").invalidateHttpSession(true))
+                .logout(logout -> logout.deleteCookies("JSESSIONID").invalidateHttpSession(true))
 
                 .formLogin(formLogin -> formLogin
                         .loginPage("/login")

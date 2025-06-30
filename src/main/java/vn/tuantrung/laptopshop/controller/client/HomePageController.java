@@ -15,8 +15,8 @@ import vn.tuantrung.laptopshop.domain.User;
 import vn.tuantrung.laptopshop.domain.dto.RegisterDTO;
 import vn.tuantrung.laptopshop.services.ProductService;
 import vn.tuantrung.laptopshop.services.UserService;
-
-
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.PostMapping;
@@ -46,6 +46,8 @@ public class HomePageController {
     public String getHomePage(Model model) {
         List<Product> products = this.productService.getProducts();
         model.addAttribute("products", products);
+    
+        
         return "client/homepage/show";
     }
 
