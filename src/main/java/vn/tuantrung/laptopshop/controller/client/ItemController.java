@@ -1,6 +1,7 @@
 package vn.tuantrung.laptopshop.controller.client;
 
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Controller;
@@ -58,7 +59,7 @@ public class ItemController {
         currentUser.setId(id);
 
         Cart cart = this.productService.fetchByUser(currentUser);
-        List<CartDetail> cartDetails = cart.getCartDetail();
+        List<CartDetail> cartDetails = cart == null ? new ArrayList<CartDetail>(): cart.getCartDetail();
 
         double totalPrice = 0;
         for(CartDetail cd : cartDetails) {
@@ -69,6 +70,16 @@ public class ItemController {
         model.addAttribute("totalPrice", totalPrice);
         return "client/cart/show";
     }
+
+    @PostMapping("/delete-cart-product/{id}")
+    public String deleteCartDetail(@PathVariable long id, HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        long cartDetailId = id;
+        this.productService.handleRemoveCartDetail(cartDetailId, session);
+        
+        return "redirect:/cart";
+    }
+    
     
     
     
