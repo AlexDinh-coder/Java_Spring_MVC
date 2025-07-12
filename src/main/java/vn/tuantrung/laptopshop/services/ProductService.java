@@ -9,10 +9,14 @@ import org.springframework.stereotype.Service;
 import jakarta.servlet.http.HttpSession;
 import vn.tuantrung.laptopshop.domain.Cart;
 import vn.tuantrung.laptopshop.domain.CartDetail;
+import vn.tuantrung.laptopshop.domain.Order;
+import vn.tuantrung.laptopshop.domain.OrderDetail;
 import vn.tuantrung.laptopshop.domain.Product;
 import vn.tuantrung.laptopshop.domain.User;
 import vn.tuantrung.laptopshop.repository.CartDetailRepository;
 import vn.tuantrung.laptopshop.repository.CartRepository;
+import vn.tuantrung.laptopshop.repository.OrderDetailRepository;
+import vn.tuantrung.laptopshop.repository.OrderRepository;
 import vn.tuantrung.laptopshop.repository.ProductRepository;
 
 @Service
@@ -21,15 +25,21 @@ public class ProductService {
     private final CartRepository cartRepository;
     private final CartDetailRepository cartDetailRepository;
     private final UserService userService;
+    private final OrderRepository orderRepository;
+    private final OrderDetailRepository orderDetailRepository;
 
     public ProductService(ProductRepository productRepository,
             CartRepository cartRepository,
             CartDetailRepository cartDetailRepository,
-            UserService userService) {
+            UserService userService,
+            OrderRepository orderRepository,
+            OrderDetailRepository orderDetailRepository) {
         this.cartDetailRepository = cartDetailRepository;
         this.userService = userService;
         this.cartRepository = cartRepository;
         this.productRepository = productRepository;
+        this.orderRepository = orderRepository;
+        this.orderDetailRepository = orderDetailRepository;
     }
 
     public Product createProduct(Product pr) {
@@ -124,5 +134,59 @@ public class ProductService {
                 session.setAttribute("sum", 0);
             }
         }
+    }
+
+    public void handleUpdateCartBeforeCheckout(List<CartDetail> cartDetails) {
+        for (CartDetail cartDetail : cartDetails) {
+            Optional<CartDetail> optionalCartDetail = this.cartDetailRepository.findById(cartDetail.getId());
+            if (optionalCartDetail.isPresent()) {
+                CartDetail currenCartDetail = optionalCartDetail.get();
+                currenCartDetail.setQuantity((cartDetail.getQuantity()));
+                this.cartDetailRepository.save(currenCartDetail);
+            }
+        }
+    }
+
+    public void handlePlaceOrder(User user, HttpSession session, String receiverName,
+            String receiverAddress,
+            String receiverPhoneNumber) {
+
+                //create order
+                Order order = new Order();
+                order.setUser(user);
+                order.setReceiverName(receiverName);
+                order.setReceiverAddress(receiverAddress);
+                order.setReceiverPhone(receiverPhoneNumber);
+                order = this.orderRepository.save(order);
+
+                //create orderDetails
+                //step 1: get cart by user
+                Cart cart = this.cartRepository.findByUser(user);
+                if (cart != null) {
+                    List<CartDetail> cartDetails = cart.getCartDetails();
+                    if (cartDetails != null) {
+                        for(CartDetail cd : cartDetails){
+                            OrderDetail orderDetail = new OrderDetail();
+                            orderDetail.setOrder(order);
+                            orderDetail.setProduct(cd.getProduct());
+                            orderDetail.setPrice(cd.getPrice());
+                            orderDetail.setQuantity(cd.getQuantity());
+                            this.orderDetailRepository.save(orderDetail);
+                        }
+
+                        //step 2: delete cartDetail and cart
+                        for(CartDetail cd : cartDetails) {
+                            this.cartDetailRepository.deleteById(cd.getId());
+                        }
+                        this.cartRepository.deleteById(cart.getId());
+
+                        //step 3: update session
+                        session.setAttribute("sum", 0);
+
+                    }
+                }
+
+
+
     }
 }
