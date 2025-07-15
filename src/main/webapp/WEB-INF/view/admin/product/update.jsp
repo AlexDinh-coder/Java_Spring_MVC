@@ -142,7 +142,7 @@
                                                         id="avatarPreview" />
                                                 </div>
                                                 <div class="col-12 mb-3">
-                                                    <button type="submit" class="btn btn-primary">Create</button>
+                                                    <button type="submit" class="btn btn-warning mx-2">Update</button>
                                                 </div>
 
                                             </form:form>
