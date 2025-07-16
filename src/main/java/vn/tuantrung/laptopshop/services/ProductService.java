@@ -1,9 +1,11 @@
 package vn.tuantrung.laptopshop.services;
 
-import java.lang.StackWalker.Option;
+
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import jakarta.servlet.http.HttpSession;
@@ -46,8 +48,12 @@ public class ProductService {
         return this.productRepository.save(pr);
     }
 
-    public List<Product> getProducts() {
-        return this.productRepository.findAll();
+    // public List<Product> fetchProducts() {
+    //     return this.productRepository.findAll();
+    // }
+
+    public Page<Product> getProducts(Pageable pageable) {
+        return this.productRepository.findAll(pageable);
     }
 
     public void deleteProduct(long id) {
