@@ -58,7 +58,7 @@ public class ProductService {
         return this.productRepository.findById(id);
     }
 
-    public void handleAddProductToCart(String email, long productId, HttpSession session) {
+    public void handleAddProductToCart(String email, long productId, HttpSession session, long quantity) {
         // Check user co cart chua> k co -> tao cart moi
         User user = this.userService.getUserByEmail(email);
         if (user != null) {
@@ -89,7 +89,7 @@ public class ProductService {
                     cartDetail.setCart(cart);
                     cartDetail.setProduct(realProduct);
                     cartDetail.setPrice(realProduct.getPrice());
-                    cartDetail.setQuantity(1);
+                    cartDetail.setQuantity(quantity);
                     this.cartDetailRepository.save(cartDetail);
 
                     // update cart sum
@@ -99,7 +99,7 @@ public class ProductService {
                     session.setAttribute("sum", s);
 
                 } else {
-                    oldDetail.setQuantity(oldDetail.getQuantity() + 1);
+                    oldDetail.setQuantity(oldDetail.getQuantity() + quantity);
                     this.cartDetailRepository.save(oldDetail);
                 }
 
@@ -108,6 +108,8 @@ public class ProductService {
         }
 
     }
+
+    
 
     public Cart fetchByUser(User user) {
         return this.cartRepository.findByUser(user);
@@ -162,7 +164,7 @@ public class ProductService {
                 order.setReceiverName(receiverName);
                 order.setReceiverAddress(receiverAddress);
                 order.setReceiverPhone(receiverPhoneNumber);
-               order.setStatus("PENDING");
+                order.setStatus("PENDING");
 
                 double sum = 0;
                 for (CartDetail cd : cartDetails) {
@@ -171,7 +173,7 @@ public class ProductService {
                 order.setTotalPrice(sum);
                 order = this.orderRepository.save(order);
 
-                //create orderDetail
+                // create orderDetail
                 for (CartDetail cd : cartDetails) {
                     OrderDetail orderDetail = new OrderDetail();
                     orderDetail.setOrder(order);

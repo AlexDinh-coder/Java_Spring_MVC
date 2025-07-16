@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import vn.tuantrung.laptopshop.domain.Order;
 import vn.tuantrung.laptopshop.domain.OrderDetail;
 import vn.tuantrung.laptopshop.domain.Product;
+import vn.tuantrung.laptopshop.domain.User;
 import vn.tuantrung.laptopshop.repository.OrderDetailRepository;
 import vn.tuantrung.laptopshop.repository.OrderRepository;
 
@@ -53,6 +54,10 @@ public class OrderService {
             currentOrder.setStatus(order.getStatus());
             this.orderRepository.save(currentOrder);
         }
+    }
+
+    public List<Order> fetchOrderByUser(User user) {
+        return this.orderRepository.findByUser(user);
     }
     
 }

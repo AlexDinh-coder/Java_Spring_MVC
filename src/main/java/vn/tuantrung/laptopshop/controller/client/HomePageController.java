@@ -10,9 +10,11 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
+import vn.tuantrung.laptopshop.domain.Order;
 import vn.tuantrung.laptopshop.domain.Product;
 import vn.tuantrung.laptopshop.domain.User;
 import vn.tuantrung.laptopshop.domain.dto.RegisterDTO;
+import vn.tuantrung.laptopshop.services.OrderService;
 import vn.tuantrung.laptopshop.services.ProductService;
 import vn.tuantrung.laptopshop.services.UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,15 +32,19 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 public class HomePageController {
     private final ProductService productService;
+    private final OrderService orderService;
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
 
     public HomePageController(ProductService productService,
+    OrderService orderService,
      UserService userService,
-     PasswordEncoder passwordEncoder) {
+     PasswordEncoder passwordEncoder
+     ) {
         this.productService = productService;
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
+        this.orderService = orderService;
     }
 
 
@@ -87,6 +93,21 @@ public class HomePageController {
     public String getDenyPage(Model model) {
         return "client/auth/deny";
     }
+
+    @GetMapping("/order-history")
+    public String getOrderHistoryPage(Model model, HttpServletRequest request) {
+        User currentUser = new User();
+        HttpSession session = request.getSession(false);
+        long id = (long) session.getAttribute("id");
+        currentUser.setId(id);
+        
+
+        List<Order> orders = this.orderService.fetchOrderByUser(currentUser);
+        model.addAttribute("orders", orders);
+        return "client/cart/order-history";
+
+    }
+    
     
     
 }

@@ -44,7 +44,7 @@ public class ItemController {
         long productId = id;
         String email = (String) session.getAttribute("email");
 
-        this.productService.handleAddProductToCart(email, productId, session);
+        this.productService.handleAddProductToCart(email, productId, session, 1);
 
         return "redirect:/";
     }
@@ -89,7 +89,6 @@ public class ItemController {
         model.addAttribute("cartDetails", cartDetails);
         model.addAttribute("totalPrice", totalPrice);
 
-        
         return "client/cart/checkout";
     }
 
@@ -113,16 +112,16 @@ public class ItemController {
 
     @PostMapping("/place-order")
     public String handlePlaceOrder(HttpServletRequest request,
-            @RequestParam("receiverName") String receiverName,          
+            @RequestParam("receiverName") String receiverName,
             @RequestParam("receiverAddress") String receiverAddress,
             @RequestParam("receiverPhone") String receiverPhone) {
-                User currentUser = new User();
-                HttpSession session = request.getSession(false);
-                long id = (long) session.getAttribute("id");
-                currentUser.setId(id);
+        User currentUser = new User();
+        HttpSession session = request.getSession(false);
+        long id = (long) session.getAttribute("id");
+        currentUser.setId(id);
 
-                this.productService.handlePlaceOrder(currentUser, session, 
-                    receiverName, receiverAddress, receiverPhone);
+        this.productService.handlePlaceOrder(currentUser, session,
+                receiverName, receiverAddress, receiverPhone);
 
         return "redirect:/thanks";
     }
@@ -131,6 +130,17 @@ public class ItemController {
     public String getThankYouPage(Model model) {
         return "client/cart/thanks";
     }
-    
+
+    @PostMapping("/add-product-from-view-detail")
+    public String postMethodName(@RequestParam("id") long id,
+            @RequestParam("quantity") long quantity,
+            HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+
+        String email = (String) session.getAttribute("email");
+        this.productService.handleAddProductToCart(email, id, session,quantity);
+
+        return "redirect:/product/" + id;
+    }
 
 }
