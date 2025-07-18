@@ -3,6 +3,7 @@ package vn.tuantrung.laptopshop.services;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.boot.autoconfigure.rsocket.RSocketProperties.Server.Spec;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -16,6 +17,7 @@ import vn.tuantrung.laptopshop.domain.OrderDetail;
 import vn.tuantrung.laptopshop.domain.Product;
 import vn.tuantrung.laptopshop.domain.Product_;
 import vn.tuantrung.laptopshop.domain.User;
+import vn.tuantrung.laptopshop.domain.dto.ProductCriteriaDTO;
 import vn.tuantrung.laptopshop.repository.CartDetailRepository;
 import vn.tuantrung.laptopshop.repository.CartRepository;
 import vn.tuantrung.laptopshop.repository.OrderDetailRepository;
@@ -58,8 +60,28 @@ public class ProductService {
         return this.productRepository.findAll(pageable);
     }
 
-    public Page<Product> getProductsWithSpec(Pageable pageable, String name) {
-    return this.productRepository.findAll(ProductSpecs.nameLike(name), pageable);
+    public Page<Product> getProductsWithSpec(Pageable pageable, ProductCriteriaDTO productCriteriaDTO) {
+        if (productCriteriaDTO.getTarget() == null && productCriteriaDTO.getFactory() == null
+                && productCriteriaDTO.getPrice() == null) {
+            return this.productRepository.findAll(pageable);
+        }
+        Specification<Product> combSpecification = Specification.where(null);
+        
+        if (productCriteriaDTO.getTarget() != null && productCriteriaDTO.getTarget().isPresent()) {
+            Specification<Product> currentSpec = ProductSpecs.matchListTarget(productCriteriaDTO.getTarget().get());
+            combSpecification = combSpecification.and(currentSpec);
+        }
+
+        if (productCriteriaDTO.getFactory() != null && productCriteriaDTO.getFactory().isPresent()) {
+            Specification<Product> currentSpec = ProductSpecs.matchListFactory(productCriteriaDTO.getFactory().get());
+            combSpecification = combSpecification.and(currentSpec);
+        }
+
+        if (productCriteriaDTO.getPrice() != null && productCriteriaDTO.getPrice().isPresent()) {
+            Specification<Product> currentSpec = this.builPriceSpecification(productCriteriaDTO.getPrice().get());
+            combSpecification = combSpecification.and(currentSpec);
+        }
+        return this.productRepository.findAll(combSpecification, pageable);
     }
 
     // case 1: min-price
@@ -105,49 +127,50 @@ public class ProductService {
     // }
 
     // case 6:
-    // public Page<Product> getProductsWithSpec(Pageable pageable, List<String> price) {
-    //     Specification<Product> combinedSpec = (root, query, criteriaBuilder) -> criteriaBuilder.disjunction();
-    //     int count = 0;
-    //     for (String p : price) {
-    //         double min = 0;
-    //         double max = 0;
+    public Specification<Product> builPriceSpecification(List<String> price) {
+        Specification<Product> combinedSpec = Specification.where(null); //disconjunction
+        int count = 0;
+        for (String p : price) {
+            double min = 0;
+            double max = 0;
 
-    //         // Set the appropriate min and max values based on the price range string
-    //         switch (p) {
-    //             case "10-trieu-15-trieu":
-    //                 min = 10000000;
-    //                 max = 15000000;
-    //                 count++;
-    //                 break;
-    //             case "15-trieu-20-trieu":
-    //                 min = 15000000;
-    //                 max = 20000000;
-    //                 count++;
-    //                 break;
+            // Set the appropriate min and max values based on the price range string
+            switch (p) {
+                case "duoi-10-trieu":
+                    min = 0;
+                    max = 10000000;
 
-    //             case "20-trieu-30-trieu":
-    //                 min = 20000000;
-    //                 max = 30000000;
-    //                 count++;
-    //                 break;
-               
-    //         }
+                    break;
+                case "10-15-trieu":
+                    min = 10000000;
+                    max = 15000000;
 
-    //         if (min != 0 && max != 0 ) {
-    //             Specification<Product> rangeSpecification = ProductSpecs.matchMultiplePrice(min, max);
-    //             combinedSpec = combinedSpec.or(rangeSpecification);
-                
-    //         }
-    //     }
+                    break;
 
-    //     //Check if any price ranges were addded (combinedSpec is empty)
-    //     if (count == 0) {
-    //         return this.productRepository.findAll(pageable);
-    //     } else {
-    //         return this.productRepository.findAll(combinedSpec, pageable);
-    //     }
+                case "15-20-trieu":
+                    min = 15000000;
+                    max = 20000000;
 
-    // }
+                    break;
+
+                case "tren-20-trieu":
+                    min = 20000000;
+                    max = 200000000;
+
+                    break;
+
+            }
+
+            if (min != 0 && max != 0) {
+                Specification<Product> rangeSpecification = ProductSpecs.matchMultiplePrice(min, max);
+                combinedSpec = combinedSpec.or(rangeSpecification);
+
+            }
+        }
+
+        return combinedSpec;
+
+    }
 
     public void deleteProduct(long id) {
         this.productRepository.deleteById(id);

@@ -135,10 +135,10 @@
             const link = $(this); // Get the current link in the loop
             const href = link.attr("href"); //Get the href attribute of the link
 
-            if(href == currentUrl) {
+            if (href == currentUrl) {
                 link.addClass("active"); // Add the 'active' if the href matches the current URL
 
-            }else {
+            } else {
                 link.removeClass("active"); // Remove the 'active' class if the href does not match the current URL
             }
         })
@@ -236,7 +236,7 @@
     //handle filter products
     $('#btnFilter').click(function (event) {
         event.preventDefault(); // Prevent the default form submission
-        
+
         let factoryArr = [];
         let targetArr = [];
         let priceArr = [];
@@ -257,8 +257,8 @@
         });
 
         //sort order
-        let sortValue = $('input[name="radio-sort]:checked').val();
-        
+        let sortValue = $('input[name="radio-sort"]:checked').val();
+
         const currentUrl = new URL(window.location.href);
         const searchParams = currentUrl.searchParams;
 
@@ -266,15 +266,20 @@
         searchParams.set('page', '1');
         searchParams.set('sort', sortValue);
 
-        if(factoryArr.length > 0) {
+        //reset
+        searchParams.delete('factory');
+        searchParams.delete('target');
+        searchParams.delete('price');
+
+        if (factoryArr.length > 0) {
             searchParams.set('factory', factoryArr.join(','));
         }
 
-        if(targetArr.length > 0) {
+        if (targetArr.length > 0) {
             searchParams.set('target', targetArr.join(','));
         }
 
-        if(priceArr.length > 0) {
+        if (priceArr.length > 0) {
             searchParams.set('price', priceArr.join(','));
         }
 
@@ -309,12 +314,25 @@
             $(`#priceFilter input[value="${price}"]`).prop('checked', true);
         });
     }
-    //set radio for 'sort'
+    // set radio for 'sort'
+    // if (params.has('sort')) {
+    //     const sortValue = params.get('sort');
+
+    //     // tránh trường hợp sort="undefined" (string), không phải undefined thực sự
+    //     if (sortValue && sortValue !== 'undefined') {
+    //         $(`input[name="radio-sort"][value="${sortValue}"]`).prop('checked', true);
+    //     }
+    // }
     if (params.has('sort')) {
         const sortValue = params.get('sort');
+        // Set the radio button based on the value of 'sort'
         $(`input[name="radio-sort"][value="${sortValue}"]`).prop('checked', true);
+    } else {
+        // If 'sort' is not present, set a default value
+        $('input[name="radio-sort"][value="default"]').prop('checked', true);
     }
-    
+
+
 
 })(jQuery);
 
